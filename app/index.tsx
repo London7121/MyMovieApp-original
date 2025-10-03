@@ -1,3 +1,4 @@
+// import TabNavigations from "@/src/navigations/tab.navigations";
 import "../src/styles/global.css"
 import AppNavigations from "@/src/navigations/app.navigations";
 
