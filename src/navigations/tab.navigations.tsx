@@ -1,7 +1,7 @@
-import Home from '../screens/Home';
-import Detailed from '../screens/Detailed';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Home from '../screens/Home';
+import Detailed from '../screens/Movie';
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigations() {

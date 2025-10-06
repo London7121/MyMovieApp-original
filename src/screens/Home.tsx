@@ -3,10 +3,12 @@ import { Image, ScrollView, StatusBar, Text, View } from 'react-native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MagnifyingGlassIcon } from "react-native-heroicons/outline"
-import { fetchTopRatedMovie, fetchTrendingMovies, fetchUpcomingMovie } from '../api/index'
+import { fetchPopularMovie, fetchTopRatedMovie, fetchTrendingMovies, fetchUpcomingMovie } from '../api/index'
 import TrendingMovies from '../components/TrendingMovies'
 import UpcomingMovies from '../components/UpcomingMovies'
 import TopRatedMovies from '../components/TopRatedMovies'
+import Loader from '../components/Loader/Loader'
+import ProgressLoader from '../components/Loader/ProgressLoader'
 
 type Props = {
     navigation: NativeStackNavigationProp<any>
@@ -14,19 +16,28 @@ type Props = {
 
 export default function Home({ navigation }: Props) {
 
+    const [loading, setIsLoading] = useState(true)
     const [trending, setTrending] = useState([])
     const [upcoming, setUpcoming] = useState([])
     const [topRated, setTopRated] = useState([])
+    const [popular, setPopular] = useState([])
 
     useEffect(() => {
-        getTendingMovies();
-        getUpcomingMovies();
-        getTopRatedMovies();
+
+        const getData = () => {
+            getTendingMovies();
+            getUpcomingMovies();
+            getTopRatedMovies();
+            getPopularMovies();
+            setIsLoading(false)
+        }
+        getData();
     }, [])
 
     const getTendingMovies = async () => {
         const data = await fetchTrendingMovies();
         setTrending(data?.results)
+        setIsLoading(false)
     }
     const getUpcomingMovies = async () => {
         const data = await fetchUpcomingMovie();
@@ -35,6 +46,10 @@ export default function Home({ navigation }: Props) {
     const getTopRatedMovies = async () => {
         const data = await fetchTopRatedMovie();
         setTopRated(data?.results)
+    }
+    const getPopularMovies = async () => {
+        const data = await fetchPopularMovie();
+        setPopular(data?.results)
     }
 
     return (
@@ -47,16 +62,23 @@ export default function Home({ navigation }: Props) {
                     <MagnifyingGlassIcon color="white" size={30} strokeWidth={2} />
                 </View>
             </SafeAreaView >
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingBottom: 100,
-                }}
-            >
-                {trending?.length > 0 && (<TrendingMovies trending={trending} />)}
-                {upcoming?.length > 0 && (<UpcomingMovies upcoming={upcoming} title={"Upcoming Movie"} />)}
-                {topRated?.length > 0 && (<TopRatedMovies />)}
-            </ScrollView>
+            {
+                loading ? <ProgressLoader /> :
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            paddingBottom: 100,
+                        }}
+                    >
+                        {trending?.length > 0 && (<TrendingMovies trending={trending} />)}
+                        {upcoming?.length > 0 && (<UpcomingMovies upcoming={upcoming} title={"Upcoming Movie"} />)}
+                        {popular?.length > 0 && (<UpcomingMovies upcoming={popular} title={"Popular Movie"} />)}
+                        {popular?.length > 0 && (<UpcomingMovies upcoming={trending?.reverse()} title={"Trending Movie"} />)}
+                        {topRated?.length > 0 && (<TrendingMovies trending={topRated} />)}
+                    </ScrollView>
+            }
+
+
         </View >
     )
 }
