@@ -1,6 +1,15 @@
 import { useNavigation } from '@react-navigation/native'
 import React, { useCallback, useState } from 'react'
-import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import {
+    Dimensions,
+    Image,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
+} from 'react-native'
 import { XMarkIcon } from 'react-native-heroicons/outline'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { fetchSearchMovie, image185 } from '../api'
@@ -8,19 +17,28 @@ import { debounce } from "lodash"
 import ProgressLoader from '../components/Loader/ProgressLoader'
 
 const { width, height } = Dimensions.get('window');
+
 interface MovieDetails {
     id: number;
-    profile_path: string;
+    poster_path: string;
+    profile_path?: string;
     title?: string;
     overview?: string;
     release_date?: string;
     [key: string]: any;
 }
 
+interface SearchResponse {
+    page: number;
+    results: MovieDetails[];
+    total_pages: number;
+    total_results: number;
+}
+
 export default function Search() {
-    const navigation = useNavigation()
-    const [isLoading, setIsLoading] = useState(true);
-    const [results, setResults] = useState<MovieDetails>({} as MovieDetails);
+    const navigation = useNavigation<any>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [results, setResults] = useState<MovieDetails[]>([]);
 
     const handleSearch = (searchText: string) => {
         if (searchText && searchText.length > 3) {
@@ -29,9 +47,12 @@ export default function Search() {
                 query: searchText,
                 include_adult: false,
                 page: '1',
-            }).then(data => {
+            }).then((data: SearchResponse) => {
                 setIsLoading(false);
-                setResults(data.results);
+                setResults(data.results || []);
+            }).catch(() => {
+                setIsLoading(false);
+                setResults([]);
             });
         } else {
             setResults([]);
@@ -39,15 +60,13 @@ export default function Search() {
         }
     };
 
-    const handleTextDobounce = useCallback(
-        debounce(handleSearch, 400),
-        []
-    );
+    const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
+
     return (
         <SafeAreaView className='flex-1 bg-slate-900'>
             <View className='mx-4 mb-3 flex-row justify-between items-center border border-neutral-400 rounded-full'>
                 <TextInput
-                    onChangeText={handleTextDobounce}
+                    onChangeText={handleTextDebounce}
                     placeholder='Search movie'
                     placeholderTextColor={"lightgray"}
                     className='pl-6 flex-1 text-base font-semibold text-white tracking-wide'
@@ -59,39 +78,37 @@ export default function Search() {
 
             {isLoading ? (
                 <ProgressLoader />
-            ) : results?.length > 0 ? (
+            ) : results.length > 0 ? (
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: 15 }}
                     className='space-y-3 border'
                 >
                     <Text className='text-white font-semibold ml-1'>
-                        Relusts ({results?.length})
+                        Results ({results.length})
                     </Text>
                     <View className='flex-row justify-between flex-wrap mt-3'>
-                        {
-                            results?.map((item, idx) => (
-                                <TouchableWithoutFeedback key={idx}>
-                                    <View className='space-y-2 mb-4'>
-                                        <Image
-                                            source={{ uri: image185(item?.poster_path) || "" }}
-                                            className='rounded-3xl'
-                                            style={{
-                                                width: width * 0.44,
-                                                height: height * 0.3
-                                            }}
-                                        />
-                                        <Text className="text-sm text-white font-semibold my-2">
-                                            {item?.title
-                                                ? item.title.length > 18
-                                                    ? item.title.slice(0, 18) + "..."
-                                                    : item.title
-                                                : "Untitled"}
-                                        </Text>
-                                    </View>
-                                </TouchableWithoutFeedback>
-                            ))
-                        }
+                        {results.map((item) => (
+                            <TouchableWithoutFeedback key={item.id}>
+                                <View className='space-y-2 mb-4'>
+                                    <Image
+                                        source={{ uri: image185(item.poster_path) || "" }}
+                                        className='rounded-3xl'
+                                        style={{
+                                            width: width * 0.44,
+                                            height: height * 0.3
+                                        }}
+                                    />
+                                    <Text className="text-sm text-white font-semibold my-2">
+                                        {item.title
+                                            ? item.title.length > 18
+                                                ? item.title.slice(0, 18) + "..."
+                                                : item.title
+                                            : "Untitled"}
+                                    </Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        ))}
                     </View>
                 </ScrollView>
             ) : (

@@ -7,10 +7,19 @@ import TrendingMovies from '../components/TrendingMovies'
 import UpcomingMovies from '../components/UpcomingMovies'
 import ProgressLoader from '../components/Loader/ProgressLoader'
 import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from "@react-navigation/stack";
+
+export type RootStackParamList = {
+    Home: undefined;
+    Search: undefined;
+    Details: { id: number }; // misol uchun param bilan sahifa
+};
+
+type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, "Search">;
 
 
 export default function Home() {
-    const navigation = useNavigation()
+    const navigation = useNavigation<SearchScreenNavigationProp>();
     const [loading, setIsLoading] = useState(true)
     const [trending, setTrending] = useState([])
     const [upcoming, setUpcoming] = useState([])
