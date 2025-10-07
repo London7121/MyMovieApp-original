@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Image, ScrollView, StatusBar, Text, View } from 'react-native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MagnifyingGlassIcon } from "react-native-heroicons/outline"
 import { fetchPopularMovie, fetchTopRatedMovie, fetchTrendingMovies, fetchUpcomingMovie } from '../api/index'
 import TrendingMovies from '../components/TrendingMovies'
 import UpcomingMovies from '../components/UpcomingMovies'
-import TopRatedMovies from '../components/TopRatedMovies'
-import Loader from '../components/Loader/Loader'
 import ProgressLoader from '../components/Loader/ProgressLoader'
+import { useNavigation } from '@react-navigation/native'
 
-type Props = {
-    navigation: NativeStackNavigationProp<any>
-}
 
-export default function Home({ navigation }: Props) {
-
+export default function Home() {
+    const navigation = useNavigation()
     const [loading, setIsLoading] = useState(true)
     const [trending, setTrending] = useState([])
     const [upcoming, setUpcoming] = useState([])
@@ -59,7 +54,9 @@ export default function Home({ navigation }: Props) {
                 <View className="flex-row items-center justify-between mx-4  my-2">
                     {/* <Image source={require('../../assets/images/icon.png')} className="h-[50px] w-[50px] rounded-xl" /> */}
                     <Text className="text-red-500 text-3xl font-bold">LOGO</Text>
-                    <MagnifyingGlassIcon color="white" size={30} strokeWidth={2} />
+                    <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+                        <MagnifyingGlassIcon color="white" size={30} strokeWidth={2} />
+                    </TouchableOpacity>
                 </View>
             </SafeAreaView >
             {
